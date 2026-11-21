@@ -159,22 +159,63 @@ public class BigramModel {
         writer.write(mVocabulary.length + " words");
         writer.newLine();
         for (int i = 0; i < mVocabulary.length; i++) {
-            writer.write(i + ", " + mVocabulary[i]);
+            writer.write(i + "," + mVocabulary[i]);
             writer.newLine();
         }
         writer.close();
     }
 
     private void saveCountsFile(String fileName) throws IOException {
-        
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+
+        for (int i = 0; i < mBigramCounts.length; i++) {
+            for (int j = 0; j < mBigramCounts[i].length; j++) {
+                if (mBigramCounts[i][j] > 0) {
+                    writer.write(i+"," + j + ":" + mBigramCounts[i][j]);
+                    writer.newLine();
+                }
+            }
+        }
+        writer.close();
     }
 
     /*
      * @pre: fileName is a legal file path
      */
     public void loadModel(String fileName) throws IOException { // Question 4
-        // TODO: implement
+        loadVocFile(fileName + VOC_FILE_SUFFIX);
+        loadCountsFile(fileName + COUNTS_FILE_SUFFIX, mVocabulary.length);
     }
+
+    private void loadVocFile(String fileName) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(fileName));
+        String line = reader.readLine();
+        String[] tokens = line.trim().split(" ");
+        int vocabSize = Integer.parseInt(tokens[0]);
+        mVocabulary = new String[vocabSize];
+        for (int i = 0; i < vocabSize; i++) {
+            line = reader.readLine();
+            tokens = line.trim().split(",",2);
+            mVocabulary[i] = tokens[1];
+        }
+        reader.close();
+
+    }
+    /* @pre: vocabSize >= 0 and matches the vocabulary size of the counts file */
+    private void loadCountsFile(String fileName, int vocabSize) throws IOException {
+        mBigramCounts = new int[vocabSize][vocabSize];
+        BufferedReader reader = new BufferedReader(new FileReader(fileName));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] tokens = line.trim().split("[:,]");
+            int index1 = Integer.parseInt(tokens[0]);
+            int index2 = Integer.parseInt(tokens[1]);
+            int count = Integer.parseInt(tokens[2]);
+            mBigramCounts[index1][index2] = count;
+        }
+        reader.close();
+    }
+
 
     /*
      * @pre: sentence is in lowercase
