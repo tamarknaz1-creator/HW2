@@ -93,8 +93,11 @@ public class PacmanGameApplication implements IGameLogic {
 //		Renderer.getInstance().fillColor(100, 149, 237); // Cornflower Blue
 		Renderer.getInstance().fillColor(50, 50, 50);
 		
-		for (PacmanGameObject obj : objects)
-			obj.render();
+		for (PacmanGameObject obj : objects) {
+			if (obj != player) // Render the player last, so it will be on top of other objects
+				obj.render();
+		}
+		player.render();
 	}
 	
 	public boolean wantsToQuit() {
